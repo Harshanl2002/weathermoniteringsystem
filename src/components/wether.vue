@@ -2,7 +2,7 @@
     <div class="glassbox" >
         <img :src="getimg(icon)" class="img">
         <div class="text">
-            <p>Today,<br>&nbsp;&nbsp;&nbsp;&nbsp;{{ val.name }}</p>
+            <p>Today,<br>&nbsp;&nbsp;&nbsp;&nbsp;{{ name }}</p>
             <div class="d">{{Math.round(temp)}}°</div>
             <div>{{ disc}}</div>
         </div>
@@ -21,6 +21,7 @@ export default
         lng:0
       },
       val:{},
+      name:{},
       temp:{},
       disc:{},
       icon:{},
@@ -42,7 +43,7 @@ export default
   {
     fetchweather(){
     //   console.log(this.coordinates)
-      let url=`https://api.openweathermap.org/data/2.5/weather?lat=${this.coordinates.lat}&lon=${this.coordinates.lng}&units=metric&appid=d63ffdc782c304f7d34d21c57518639c`
+      let url=`https://api.weatherapi.com/v1/forecast.json?key=62ce7928966f48269ed91923230806&q=${this.coordinates.lat},${this.coordinates.lng}&aqi=no&alerts=no`;
       fetch(url)
       .then((resp)=>{
         if(!resp.ok) throw new Error(resp.statusText);
@@ -53,15 +54,24 @@ export default
       },
       seeres(res)
       {
-        this.val=res;
-        this.temp=parseInt(res.main.temp);
-        this.disc=res.weather[0].main;
-        this.icon=res.weather[0].icon;
         console.log(res)
+        this.temp=res.forecast.forecastday[0].day.avgtemp_c
+        this.date=this.timeConverter(res.forecast.forecastday[0].date)
+        this.icon=res.forecast.forecastday[0].day.condition.icon
+        this.icon=("https:".concat(this.icon))
+        this.disc=res.forecast.forecastday[0].day.condition.text
+        this.name=res.location.name+", "+res.location.region
+        console.log(this.icon)
+
       },
-      getimg(icon)
+      timeConverter(date){
+        var c=date.split("-")
+        var nd= c[2]+"-"+c[1]+"-"+c[0]
+        return nd;
+    },
+      getimg()
       {
-        return new URL('https://openweathermap.org/img/wn/'+icon+'@2x.png',import.meta.url)
+        return new URL(this.icon,import.meta.url)
       }
 
   }
@@ -72,7 +82,7 @@ export default
 <style>
 .glassbox
 {
-    min-width: 70vw;
+    min-width: 80vw;
     max-width: fit-content;
     min-height: 50vh;
     background-color: #b9ccda6f;
@@ -136,4 +146,6 @@ export default
     font-size: 4rem;
     font-weight: 200;
 }
+
+
 </style>
